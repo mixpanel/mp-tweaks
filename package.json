@@ -19,7 +19,7 @@
     "jest-environment-jsdom": "^30.0.4",
     "jsdom": "^26.1.0",
     "path": "^0.12.7",
-    "puppeteer": "^22.6.3",
+    "puppeteer": "^22.15.0",
     "sinon-chrome": "^3.0.1",
     "typescript": "^5.9.3",
     "util": "^0.12.5",
