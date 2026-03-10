@@ -1156,9 +1156,11 @@ function cacheDOM() {
 	this.DOM.sessionReplayLabel = document.querySelector('#sessionReplayLabel');
 	this.DOM.sessionReplayStatus = document.querySelector('#sessionReplayLabel b');
 
-	//odds and ends
+	//fix random stuff
 	this.DOM.nukeCookies = document.querySelector('#nukeCookies');
 	this.DOM.embedSDK = document.querySelector('#embedSDK');
+	this.DOM.safeNukeLS = document.querySelector('#safeNukeLS');
+	this.DOM.realNukeLS = document.querySelector('#realNukeLS');
 
 	this.DOM.versionLabel = document.querySelector('#versionLabel');
 
@@ -1838,6 +1840,16 @@ function bindListeners() {
 		this.DOM.embedSDK.addEventListener('click', async () => {
 			const tab = await getCurrentTab();
 			await messageWorker('embed-sdk', { tab });
+		});
+
+		this.DOM.safeNukeLS.addEventListener('click', async () => {
+			const result = await messageWorker('safe-nuke-localstorage');
+			alert(`🧹 Safe Nuke: removed ${result.removed} of ${result.total} localStorage keys`);
+		});
+
+		this.DOM.realNukeLS.addEventListener('click', async () => {
+			const result = await messageWorker('real-nuke-localstorage');
+			alert(`☢️ Real Nuke: removed ${result.removed} of ${result.total} localStorage keys`);
 		});
 
 		//logo tweak animation

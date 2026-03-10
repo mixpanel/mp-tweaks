@@ -634,6 +634,32 @@ async function handleRequest(request) {
 			result = await nukeCookies();
 			break;
 
+		case 'safe-nuke-localstorage':
+			console.log('mp-tweaks: safe nuke localStorage');
+			result = await runScript(() => {
+				const total = localStorage.length;
+				console.log(`mp-tweaks: [Safe Nuke] START — ${total} total localStorage keys`);
+				const keys = Object.keys(localStorage).filter(key => key.includes('$mp_current_project_client_cache'));
+				keys.forEach(key => localStorage.removeItem(key));
+				console.log(`mp-tweaks: [Safe Nuke] END — removed ${keys.length} of ${total} keys`);
+				return { removed: keys.length, total };
+			});
+			result = result?.[0]?.result;
+			break;
+
+		case 'real-nuke-localstorage':
+			console.log('mp-tweaks: real nuke localStorage');
+			result = await runScript(() => {
+				const total = localStorage.length;
+				console.log(`mp-tweaks: [Real Nuke] START — ${total} total localStorage keys`);
+				const keys = Object.keys(localStorage).filter(key => key.startsWith('$mp_'));
+				keys.forEach(key => localStorage.removeItem(key));
+				console.log(`mp-tweaks: [Real Nuke] END — removed ${keys.length} of ${total} keys`);
+				return { removed: keys.length, total };
+			});
+			result = result?.[0]?.result;
+			break;
+
 		case 'reload':
 			console.log('mp-tweaks: reloading page');
 			await runScript(reload);
