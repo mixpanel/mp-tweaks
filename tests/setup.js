@@ -19,6 +19,8 @@ if (!isDebugMode) {
   };
 }
 
+//hello ANDY!
+
 // Log test mode
 if (isDebugMode) {
   console.log('🐛 Running tests in DEBUG mode - browser will be visible');
