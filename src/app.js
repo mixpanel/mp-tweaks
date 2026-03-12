@@ -263,6 +263,10 @@ async function checkAIMagicEnabled() {
 					APP.DOM.aiGoButton.textContent = 'Go! (fill required fields)';
 				}
 			}
+			// Update source project display for extend-dataset
+			const sourceEl = document.getElementById('ai-source-project');
+			if (sourceEl) sourceEl.textContent = projectId;
+
 			return { projectId, region };
 		} else if (jobRunning) {
 			if (APP.DOM.aiProjectLabel) APP.DOM.aiProjectLabel.textContent = projectId || 'not detected';
@@ -603,7 +607,7 @@ function renderAIMacroPanel(macroType) {
 	if (!config) return;
 
 	const sourceProjectLine = macroType === 'extend-dataset'
-		? `<p class="small"><b>Source Project:</b> ${APP.DOM.aiProjectLabel?.textContent || 'not detected'}</p>`
+		? `<p class="small"><b>Source Project:</b> <span id="ai-source-project">${APP.DOM.aiProjectLabel?.textContent || 'not detected'}</span></p>`
 		: '';
 
 	panel.innerHTML = `
