@@ -602,9 +602,14 @@ function renderAIMacroPanel(macroType) {
 	const config = AI_MACRO_CONFIGS[macroType];
 	if (!config) return;
 
+	const sourceProjectLine = macroType === 'extend-dataset'
+		? `<p class="small"><b>Source Project:</b> ${APP.DOM.aiProjectLabel?.textContent || 'not detected'}</p>`
+		: '';
+
 	panel.innerHTML = `
 		<h4>${config.title}</h4>
 		<p class="small">${config.description}</p>
+		${sourceProjectLine}
 		<div class="ai-fields">
 			${config.fields.map(f => renderAIField(f)).join('')}
 		</div>
@@ -614,7 +619,7 @@ function renderAIMacroPanel(macroType) {
 	// Hide product context for macros that have their own prompt field
 	const contextSection = APP.DOM.aiProductContext?.closest('.ai-context-section');
 	if (contextSection) {
-		contextSection.classList.toggle('hidden', macroType === 'dataset' || macroType === 'e2e' || macroType === 'dashboard' || macroType === 'behaviors-metrics');
+		contextSection.classList.toggle('hidden', macroType === 'dataset' || macroType === 'extend-dataset' || macroType === 'e2e' || macroType === 'dashboard' || macroType === 'behaviors-metrics' || macroType === 'replay');
 	}
 
 	// Add event listeners to save field values on change (debounced)
