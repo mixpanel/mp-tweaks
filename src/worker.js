@@ -66,7 +66,7 @@ function cleanupAllTimers() {
 	activeTimeouts.clear();
 }
 
-const APP_VERSION = `2.55`;
+const APP_VERSION = `2.56`;
 const SCRIPTS = {
 	"hundredX": { path: './src/tweaks/hundredX.js', code: "" },
 	"catchFetch": { path: "./src/tweaks/catchFetch.js", code: "" },
@@ -634,6 +634,32 @@ async function handleRequest(request) {
 			result = await nukeCookies();
 			break;
 
+		case 'safe-nuke-localstorage':
+			console.log('mp-tweaks: safe nuke localStorage');
+			result = await runScript(() => {
+				const total = localStorage.length;
+				console.log(`mp-tweaks: [Safe Nuke] START — ${total} total localStorage keys`);
+				const keys = Object.keys(localStorage).filter(key => key.includes('$mp_current_project_client_cache'));
+				keys.forEach(key => localStorage.removeItem(key));
+				console.log(`mp-tweaks: [Safe Nuke] END — removed ${keys.length} of ${total} keys`);
+				return { removed: keys.length, total };
+			});
+			result = result?.[0]?.result;
+			break;
+
+		case 'real-nuke-localstorage':
+			console.log('mp-tweaks: real nuke localStorage');
+			result = await runScript(() => {
+				const total = localStorage.length;
+				console.log(`mp-tweaks: [Real Nuke] START — ${total} total localStorage keys`);
+				const keys = Object.keys(localStorage).filter(key => key.startsWith('$mp_'));
+				keys.forEach(key => localStorage.removeItem(key));
+				console.log(`mp-tweaks: [Real Nuke] END — removed ${keys.length} of ${total} keys`);
+				return { removed: keys.length, total };
+			});
+			result = result?.[0]?.result;
+			break;
+
 		case 'reload':
 			console.log('mp-tweaks: reloading page');
 			await runScript(reload);
@@ -711,18 +737,18 @@ async function waitUntil(promise) {
 
 async function runAIMacro(macroType, params) {
 	const endpoints = {
-		'e2e': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-e2e',
-		'replay': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/meeple-job',
-		'dataset': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-dataset',
-		'extend-dataset': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-extend-dataset',
-		'schema': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-schema',
-		'merge': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-merge',
-		'show-hide': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-show-hide',
-		'dashboard': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-dash-gen',
-		'behaviors-metrics': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-behaviors-metrics',
-		'tags': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-tags',
-		'rename-reports': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-rename-reports',
-		'rename-entities': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/ai-rename-entities'
+		'e2e': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-e2e',
+		'replay': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/meeple-job',
+		'dataset': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-dataset',
+		'extend-dataset': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-extend-dataset',
+		'schema': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-schema',
+		'merge': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-merge',
+		'show-hide': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-show-hide',
+		'dashboard': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-dash-gen',
+		'behaviors-metrics': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-behaviors-metrics',
+		'tags': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-tags',
+		'rename-reports': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-rename-reports',
+		'rename-entities': 'https://mixpanel-power-tools-api-lmozz6xkha-uc.a.run.app/macro/ai-rename-entities'
 	};
 
 	const url = endpoints[macroType];

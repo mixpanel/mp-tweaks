@@ -3,7 +3,7 @@
 // @ts-ignore
 let STORAGE;
 
-const APP_VERSION = `2.55`;
+const APP_VERSION = `2.56`;
 // const FEATURE_FLAG_URI = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTks7GMkQBfvqKgjIyzLkRYAGRhcN6yZhI46lutP8G8OokZlpBO6KxclQXGINgS63uOmhreG9ClnFpb/pub?gid=0&single=true&output=csv`;
 // const DEMO_GROUPS_URI = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQdxs7SWlOc3f_b2f2j4fBk2hwoU7GBABAmJhtutEdPvqIU4I9_QRG6m3KSWNDnw5CYB4pEeRAiSjN7/pub?gid=0&single=true&output=csv`;
 // const TOOLS_URI = `https://docs.google.com/spreadsheets/d/e/2PACX-1vRN5Eu0Lj2dfxM7OSZiR91rcN4JSTprUz07wk8jZZyxOhOHZvRnlgGHJKIOHb6DIb4sjQQma35dCzPZ/pub?gid=0&single=true&output=csv`;
@@ -263,6 +263,10 @@ async function checkAIMagicEnabled() {
 					APP.DOM.aiGoButton.textContent = 'Go! (fill required fields)';
 				}
 			}
+			// Update source project display for extend-dataset
+			const sourceEl = document.getElementById('ai-source-project');
+			if (sourceEl) sourceEl.textContent = projectId;
+
 			return { projectId, region };
 		} else if (jobRunning) {
 			if (APP.DOM.aiProjectLabel) APP.DOM.aiProjectLabel.textContent = projectId || 'not detected';
@@ -602,9 +606,14 @@ function renderAIMacroPanel(macroType) {
 	const config = AI_MACRO_CONFIGS[macroType];
 	if (!config) return;
 
+	const sourceProjectLine = macroType === 'extend-dataset'
+		? `<p class="small"><b>Source Project:</b> <span id="ai-source-project">${APP.DOM.aiProjectLabel?.textContent || 'not detected'}</span></p>`
+		: '';
+
 	panel.innerHTML = `
 		<h4>${config.title}</h4>
 		<p class="small">${config.description}</p>
+		${sourceProjectLine}
 		<div class="ai-fields">
 			${config.fields.map(f => renderAIField(f)).join('')}
 		</div>
@@ -614,7 +623,7 @@ function renderAIMacroPanel(macroType) {
 	// Hide product context for macros that have their own prompt field
 	const contextSection = APP.DOM.aiProductContext?.closest('.ai-context-section');
 	if (contextSection) {
-		contextSection.classList.toggle('hidden', macroType === 'dataset' || macroType === 'e2e' || macroType === 'dashboard' || macroType === 'behaviors-metrics');
+		contextSection.classList.toggle('hidden', macroType === 'dataset' || macroType === 'extend-dataset' || macroType === 'e2e' || macroType === 'dashboard' || macroType === 'behaviors-metrics' || macroType === 'replay');
 	}
 
 	// Add event listeners to save field values on change (debounced)
@@ -1156,9 +1165,11 @@ function cacheDOM() {
 	this.DOM.sessionReplayLabel = document.querySelector('#sessionReplayLabel');
 	this.DOM.sessionReplayStatus = document.querySelector('#sessionReplayLabel b');
 
-	//odds and ends
+	//fix random stuff
 	this.DOM.nukeCookies = document.querySelector('#nukeCookies');
 	this.DOM.embedSDK = document.querySelector('#embedSDK');
+	this.DOM.safeNukeLS = document.querySelector('#safeNukeLS');
+	this.DOM.realNukeLS = document.querySelector('#realNukeLS');
 
 	this.DOM.versionLabel = document.querySelector('#versionLabel');
 
@@ -1838,6 +1849,16 @@ function bindListeners() {
 		this.DOM.embedSDK.addEventListener('click', async () => {
 			const tab = await getCurrentTab();
 			await messageWorker('embed-sdk', { tab });
+		});
+
+		this.DOM.safeNukeLS.addEventListener('click', async () => {
+			const result = await messageWorker('safe-nuke-localstorage');
+			alert(`🧹 Safe Nuke: removed ${result.removed} of ${result.total} localStorage keys`);
+		});
+
+		this.DOM.realNukeLS.addEventListener('click', async () => {
+			const result = await messageWorker('real-nuke-localstorage');
+			alert(`☢️ Real Nuke: removed ${result.removed} of ${result.total} localStorage keys`);
 		});
 
 		//logo tweak animation
